@@ -1,15 +1,14 @@
 <?php
-require 'Mautic/autoload.php';
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-if ( ! function_exists( 'FluentFormMauticAutoload' ) ) {
+if ( ! function_exists( 'Mautic' ) ) {
 
-    function FluentFormMauticAutoload( $class ) {
+    function Mautic( $class ) {
 
         // Do not load unless in plugin domain.
-        $namespace = 'FluentFormMautic';
+        $namespace = 'Mautic';
         if ( strpos( $class, $namespace ) !== 0 ) {
             return;
         }
@@ -26,5 +25,5 @@ if ( ! function_exists( 'FluentFormMauticAutoload' ) ) {
         }
     }
     // Register the autoloader.
-    spl_autoload_register( 'FluentFormMauticAutoload' );
+    spl_autoload_register( 'Mautic' );
 }

@@ -5,7 +5,7 @@
  * Description: add form data on mautic by ff pro
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
- * Version: 1.9.3
+ * Version: 1.0.0
  * Text Domain: ffmauticaddon
  */
 
@@ -129,3 +129,5 @@ class FluentFormMautic
 add_action('plugins_loaded', function () {
     (new FluentFormMautic())->boot();
 });
+
+
