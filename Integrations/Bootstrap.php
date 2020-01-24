@@ -27,25 +27,8 @@ class Bootstrap extends IntegrationManager
 
         $this->registerAdminHooks();
 
-        $this->test();
 
        add_filter('fluentform_notifying_async_mautic', '__return_false');
-    }
-
-
-    public function test() {
-        $settings = array(
-            'baseUrl'          => '',       // Base URL of the Mautic instance
-            'version'          => 'OAuth2', // Version of the OAuth can be OAuth2 or OAuth1a. OAuth2 is the default value.
-            'clientKey'        => '',       // Client/Consumer key from Mautic
-            'clientSecret'     => '',       // Client/Consumer secret key from Mautic
-            'callback'         => ''        // Redirect URI/Callback URI for this script
-        );
-        
-        $initAuth = new ApiAuth();
-     
-        $auth = $initAuth->newAuth($settings);
-        dd($auth);
     }
 
     public function getGlobalFields($fields)
