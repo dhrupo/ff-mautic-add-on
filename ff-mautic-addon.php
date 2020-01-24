@@ -29,10 +29,8 @@
 
 
 defined('ABSPATH') or die;
-
 define('FFMAUTIC_DIR', plugin_dir_path(__FILE__));
 
-include FFMAUTIC_DIR . 'autoload.php';
 class FluentFormMautic
 {
     protected $addOns = array(
