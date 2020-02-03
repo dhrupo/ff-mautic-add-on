@@ -6,112 +6,181 @@ class API
 {
     protected $apiUrl = '';
 
-    protected $username = null;
+    protected $clientId = null;
 
-    protected $password = null;
+    protected $clientSecret = null;
 
-    public function __construct($apiUrl, $username, $password)
+    protected $callBackUrl = null;
+
+    protected $settings = [];
+
+    public function __construct($apiUrl, $settings)
     {
+        if(substr($apiUrl, -1) == '/') {
+            $apiUrl = substr($apiUrl, -1);
+        }
         $this->apiUrl = $apiUrl;
-        $this->username = $username;
-        $this->password = $password;
+        $this->clientId = $settings['client_id'];
+        $this->clientSecret = $settings['client_secret'];
+        $this->settings = $settings;
+        $this->callBackUrl = admin_url('?ff_mautic_auth=1');
     }
 
-    public function makeAuthString()
-    {       
-        $userCredentials =  $this->username . ':' . $this->password;
-        return $authstring = 'Basic ' . base64_encode($userCredentials);    
-    }
-
-    public function make_request($action, $options = array(), $method = 'GET')
+    public function redirectToAuthServer()
     {
-        $apiPath = $this->apiUrl . '/api/'. $action;
- 
-        if($method == 'POST') {
-          $response = wp_remote_post(
-                $apiPath,
-                [
-                    'headers' => [
-                        'Authorization' => $this->makeAuthString(),
-                        'content-type'=> 'application/json'
-                    ],
-                    'body' => json_encode($options)
-                ]     
-                
-            );
-        } else if($method == 'GET') {
-                $response = wp_remote_get(
-                    $apiPath,
-                    [
-                        'headers' => [
-                            'Authorization' => $this->makeAuthString()
-                        ]
-                    ]
-                );
-        }  else {
-            return (new \WP_Error(423, 'Request method could not be found'));
-        }
+        $url = add_query_arg([
+            'client_id' => $this->clientId,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $this->callBackUrl,
+            'response_type' => 'code',
+            'state' => md5($this->clientId)
+        ], $this->apiUrl.'/oauth/v2/authorize');
 
-        /* If WP_Error, die. Otherwise, return decoded JSON. */
-        if (is_wp_error($response)) {
-            return [
-                'error'   => 'API_Error',
-                'message' => $response->get_error_message()
-            ];
-        } else if ($response && $response['response']['code'] >= 300) {
-            return [
-                'error'   => 'API_Error',
-                'message' => $response['response']['message']
-            ];
-        }
-        return json_decode($response['body'], true);
+        wp_redirect($url);
+        exit();
     }
 
-    /**
-     * Test the provided API credentials.
-     *
-     * @access public
-     * @return bool
-     */
-    public function auth_test()
+    public function generateAccessToken($code, $settings)
     {
-        return $this->make_request('users', [], 'GET');
-    }
+        $response = wp_remote_post($this->apiUrl.'/oauth/v2/token', [
+            'body' => [
+                'client_id'     => $this->clientId,
+                'client_secret' => $this->clientSecret,
+                'grant_type'    => 'authorization_code',
+                'redirect_uri'  => $this->callBackUrl,
+                'code'          => $code
+            ]
+        ]);
 
-
-    public function subscribe($data)
-    {
-        $response = $this->make_request('contacts/new', $data, 'POST');
-       
-        if (!empty($response['error'])) {
-            return new \WP_Error('api_error', $response['message']);
-        }
-        return $response;
-    }
-
-    /**
-     * Get all Forms in the system.
-     *
-     * @access public
-     * @return array
-     */
-    public function getGroups()
-    {
-        $response = $this->make_request('groups', array(), 'GET');
-        if (empty($response['error'])) {
+        if(is_wp_error($response)) {
             return $response;
         }
-        return [];
+
+        $body = wp_remote_retrieve_body($response);
+        $body = \json_decode($body, true);
+
+        if(isset($body['error_description'])) {
+            return new \WP_Error('invalid_client', $body['error_description']);
+        }
+
+        $settings['access_token'] = $body['access_token'];
+        $settings['refresh_token'] = $body['refresh_token'];
+        $settings['expire_at'] = time() + intval($body['expires_in']);
+        return $settings;
     }
+
+    public function make_request($action, $data = array(), $method = 'GET')
+    {
+        $settings = $this->getApiSettings();
+        if(is_wp_error($settings)) {
+            return $settings;
+        }
+
+        $url = $this->apiUrl.'/api/'.$action;
+
+        $data['access_token'] = $settings['access_token'];
+        $response = false;
+        if($method == 'GET') {
+            $url = add_query_arg($data, $url);
+            $response = wp_remote_get($url);
+        } else if($method == 'POST') {
+            $response = wp_remote_post($url, [
+                'body' => $data
+            ]);
+        }
+
+        if(!$response) {
+            return new \WP_Error('invalid', 'Request could not be performed');
+        }
+
+        if(is_wp_error($response)) {
+            return new \WP_Error('wp_error', $response->get_error_message());
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $body = \json_decode($body, true);
+
+        if(isset($body['errrors'])) {
+            if(!empty($body['errrors'][0]['description'])) {
+                $message = $body['errrors'][0]['description'];
+            } else if(!empty($body['error_description'])) {
+                $message = $body['error_description'];
+            } else {
+                $message = 'Error when requesting to API Server';
+            }
+
+            return new \WP_Error('request_error', $message);
+        }
+
+        return $body;
+    }
+
 
     public function getContactFields()
     {
-        $response = $this->make_request('fields/contact', array(), 'GET');
-  
-        if (empty($response['error'])) {
-            return $response;
+        $settings = $this->getApiSettings();
+        $url = $this->apiUrl.'/index.php/api/contacts?access_token='.$settings['access_token'];
+        $response =  wp_remote_get($url);
+        $contacts = wp_remote_retrieve_body($response);
+        $contacts = \json_decode($contacts, true);
+        return $contacts;
+    }
+
+    protected function getApiSettings()
+    {
+        $this->maybeRefreshToken();
+
+        $apiSettings = $this->settings;
+
+        if(!$apiSettings['status'] || !$apiSettings['expire_at']) {
+            return new \WP_Error('invalid', 'API key is invalid');
         }
-        return false;
+
+        return array(
+            'baseUrl'          => $this->apiUrl,       // Base URL of the Mautic instance
+            'version'          => 'OAuth2', // Version of the OAuth can be OAuth2 or OAuth1a. OAuth2 is the default value.
+            'clientKey'        => $this->clientId,       // Client/Consumer key from Mautic
+            'clientSecret'     => $this->clientSecret,       // Client/Consumer secret key from Mautic
+            'callback'         => $this->callBackUrl,        // Redirect URI/Callback URI for this script
+            'access_token' => $apiSettings['access_token'],
+            'refresh_token' => $apiSettings['refresh_token'],
+            'expire_at' => $apiSettings['expire_at']
+        );
+    }
+
+    protected function maybeRefreshToken()
+    {
+        $settings = $this->settings;
+        $expireAt = $settings['expire_at'];
+
+        if( $expireAt && $expireAt <= (time() - 10) ) {
+            // we have to regenerate the tokens
+            $response = wp_remote_post($this->apiUrl.'/oauth/v2/token', [
+                'body' => [
+                    'client_id'     => $this->clientId,
+                    'client_secret' => $this->clientSecret,
+                    'grant_type'    => 'refresh_token',
+                    'refresh_token' => $settings['refresh_token'],
+                    'redirect_uri'  => $this->callBackUrl
+                ]
+            ]);
+
+            if(is_wp_error($response)) {
+                $settings['status'] = false;
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $body = \json_decode($body, true);
+
+            if(isset($body['error_description'])) {
+                $settings['status'] = false;
+            }
+            $settings['access_token'] = $body['access_token'];
+            $settings['refresh_token'] = $body['refresh_token'];
+            $settings['expire_at'] = time() + intval($body['expires_in']);
+            $this->settings = $settings;
+            update_option('_fluentform_mautic_settings', $settings, 'no');
+        }
     }
 
 }

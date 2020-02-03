@@ -1,11 +1,10 @@
 <?php
 
-namespace  FluentFormMautic\Integrations;
+namespace FluentFormMautic\Integrations;
 
 use FluentForm\App\Services\Integrations\IntegrationManager;
 use FluentForm\Framework\Foundation\Application;
 use FluentForm\Framework\Helpers\ArrayHelper;
-use Mautic\Auth\ApiAuth;
 
 class Bootstrap extends IntegrationManager
 {
@@ -20,7 +19,7 @@ class Bootstrap extends IntegrationManager
             36
         );
 
-    
+
         $this->logo = $this->app->url('public/img/integrations/mautic.png');
 
         $this->description = 'Mautic is Easy to use all-in-one software for live chat, email marketing automation, forms, knowledge base, and more for a complete 360° view of your contacts.';
@@ -28,7 +27,45 @@ class Bootstrap extends IntegrationManager
         $this->registerAdminHooks();
 
 
-       add_filter('fluentform_notifying_async_mautic', '__return_false');
+        add_filter('fluentform_notifying_async_mautic', '__return_false');
+
+        add_action('admin_init', function () {
+            if(isset($_REQUEST['ff_mautic_auth'])) {
+                $client = $this->getRemoteClient();
+                if(isset($_REQUEST['code'])) {
+                    // Get the access token now
+                    $code = sanitize_text_field($_REQUEST['code']);
+                    $settings = $this->getGlobalSettings([]);
+                    $settings = $client->generateAccessToken($code, $settings);
+
+                    if(!is_wp_error($settings)) {
+                        $settings['status'] = true;
+                        update_option($this->optionKey, $settings, 'no');
+                    }
+
+                    wp_redirect(admin_url('admin.php?page=fluent_forms_settings#general-mautic-settings'));
+                    exit();
+                } else {
+                    $client->redirectToAuthServer();
+                }
+                die();
+            }
+
+            if(isset($_REQUEST['mm_test'])) {
+                $api = $this->getRemoteClient();
+
+                $contacts = $api->make_request('contacts/new', [
+                    'firstname' => 'Jewel',
+                    'lastname' => 'SHAHJAHAN',
+                    'email' => 'jl@gmail.com'
+                ], 'POST');
+
+                print_r($contacts);
+                die();
+            }
+
+        });
+
     }
 
     public function getGlobalFields($fields)
@@ -41,23 +78,23 @@ class Bootstrap extends IntegrationManager
             'invalid_message'  => __('Your Mautic API Key is not valid', 'fluentformpro'),
             'save_button_text' => __('Save Settings', 'fluentformpro'),
             'fields'           => [
-                'apiUrl' => [
+                'apiUrl'        => [
                     'type'        => 'text',
-                    'placeholder' => 'Your Moutic API URL',
-                    'label_tips'  => __("Enter your Mautic API Key, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
+                    'placeholder' => 'Your Mautic Installation URL',
+                    'label_tips'  => __("Please provide your Mautic Installation URL", 'fluentformpro'),
                     'label'       => __('Your Moutic API URL', 'fluentformpro'),
                 ],
-                'username' => [
+                'client_id'     => [
                     'type'        => 'text',
-                    'placeholder' => 'Mautic Username',
-                    'label_tips'  => __("Enter your Mautic API Key, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
-                    'label'       => __('Mautic Username', 'fluentformpro'),
+                    'placeholder' => 'Mautic App Client ID',
+                    'label_tips'  => __("Enter your Mautic Client ID, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
+                    'label'       => __('Mautic Client ID', 'fluentformpro'),
                 ],
-                'passsword' => [
+                'client_secret' => [
                     'type'        => 'password',
-                    'placeholder' => 'Mautic Password',
+                    'placeholder' => 'Mautic App Client Secret',
                     'label_tips'  => __("Enter your Mautic API Key, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
-                    'label'       => __('Mautic Password', 'fluentformpro'),
+                    'label'       => __('Mautic Client Secret', 'fluentformpro'),
                 ],
             ],
             'hide_on_valid'    => true,
@@ -65,7 +102,9 @@ class Bootstrap extends IntegrationManager
                 'section_description' => 'Your Mautic API integration is up and running',
                 'button_text'         => 'Disconnect Mautic',
                 'data'                => [
-                    'apiKey' => ''
+                    'apiUrl'        => '',
+                    'client_id'     => '',
+                    'client_secret' => ''
                 ],
                 'show_verify'         => true
             ]
@@ -79,10 +118,13 @@ class Bootstrap extends IntegrationManager
             $globalSettings = [];
         }
         $defaults = [
-            'apiUrl' => '',
-            'username' => '',
-            'passsword' => '',
-            'status' => ''
+            'apiUrl'        => '',
+            'client_id'     => '',
+            'client_secret' => '',
+            'status'    => '',
+            'access_token' => '',
+            'refresh_token' => '',
+            'expire_at' => false
         ];
 
         return wp_parse_args($globalSettings, $defaults);
@@ -92,12 +134,12 @@ class Bootstrap extends IntegrationManager
     {
         if (empty($settings['apiUrl'])) {
             $integrationSettings = [
-                'apiUrl' => '',
-                'username' => '',
-                'passsword' => '',
-                'status' => false
+                'apiUrl'        => '',
+                'client_id'     => '',
+                'client_secret' => '',
+                'status'    => false
             ];
-            // Update the reCaptcha details with siteKey & secretKey.
+            // Update the details with siteKey & secretKey.
             update_option($this->optionKey, $integrationSettings, 'no');
             wp_send_json_success([
                 'message' => __('Your settings has been updated', 'fluentformpro'),
@@ -107,47 +149,22 @@ class Bootstrap extends IntegrationManager
 
         // Verify API key now
         try {
-            $integrationSettings = [
-                'apiUrl' => esc_url_raw($settings['apiUrl']),
-                'username' => sanitize_text_field($settings['username']),
-                'passsword' => sanitize_text_field($settings['passsword']),
-                'status' => false
-            ];
-            update_option($this->optionKey, $integrationSettings, 'no');
+            $oldSettings = $this->getGlobalSettings([]);
+            $oldSettings['apiUrl'] = esc_url_raw($settings['apiUrl']);
+            $oldSettings['client_id'] = sanitize_text_field($settings['client_id']);
+            $oldSettings['client_secret'] = sanitize_text_field($settings['client_secret']);
+            $oldSettings['status'] = false;
 
-            $api = new API(
-                $integrationSettings['apiUrl'],
-                $integrationSettings['username'],
-                $integrationSettings['passsword']
-            );
-
-            $result = $api->auth_test();
-            
-            if (!empty($result['error'])) {
-                throw new \Exception($result['message']);
-            }
+            update_option($this->optionKey, $oldSettings, 'no');
+            wp_send_json_success([
+                'message'      => 'You are redirect to athenticate',
+                'redirect_url' => admin_url('?ff_mautic_auth=1')
+            ], 200);
         } catch (\Exception $exception) {
             wp_send_json_error([
                 'message' => $exception->getMessage()
             ], 400);
         }
-
-        // Integration key is verified now, Proceed now
-
-        $integrationSettings = [
-            'apiUrl' => esc_url_raw($settings['apiUrl']),
-            'username' => sanitize_text_field($settings['username']),
-            'passsword' => sanitize_text_field($settings['passsword']),
-            'status' => true
-        ];
-
-        // Update the reCaptcha details with siteKey & secretKey.
-        update_option($this->optionKey, $integrationSettings, 'no');
-
-        wp_send_json_success([
-            'message' => __('Your Mautic api key has been verfied and successfully set', 'fluentformpro'),
-            'status'  => true
-        ], 200);
     }
 
     public function pushIntegration($integrations, $formId)
@@ -187,7 +204,7 @@ class Bootstrap extends IntegrationManager
         $fields = $api->getContactFields();
 
         return [
-            'fields'              => [
+            'fields'            => [
                 [
                     'key'         => 'name',
                     'label'       => 'Feed Name',
@@ -210,14 +227,14 @@ class Bootstrap extends IntegrationManager
                             'input_options' => 'emails'
                         ],
                         [
-                            'key'           => 'lead_name',
-                            'label'         => 'Name',
-                            'required'      => false
+                            'key'      => 'lead_name',
+                            'label'    => 'Name',
+                            'required' => false
                         ],
                         [
-                            'key'           => 'lead_phone',
-                            'label'         => 'Phone',
-                            'required'      => false
+                            'key'      => 'lead_phone',
+                            'label'    => 'Phone',
+                            'required' => false
                         ]
                     ]
                 ],
@@ -227,7 +244,7 @@ class Bootstrap extends IntegrationManager
                     'required'    => false,
                     'placeholder' => 'Tags',
                     'component'   => 'value_text',
-                    'inline_tip' => 'Use comma separated value. You can use smart tags here'
+                    'inline_tip'  => 'Use comma separated value. You can use smart tags here'
                 ],
                 [
                     'key'             => 'landing_url',
@@ -244,10 +261,10 @@ class Bootstrap extends IntegrationManager
                     'checkobox_label' => 'Enable last IP address'
                 ],
                 [
-                    'key'          => 'conditionals',
-                    'label'        => 'Conditional Logics',
-                    'tips'         => 'Allow Gist integration conditionally based on your submission values',
-                    'component'    => 'conditional_block'
+                    'key'       => 'conditionals',
+                    'label'     => 'Conditional Logics',
+                    'tips'      => 'Allow Gist integration conditionally based on your submission values',
+                    'component' => 'conditional_block'
                 ],
                 [
                     'key'             => 'enabled',
@@ -256,7 +273,7 @@ class Bootstrap extends IntegrationManager
                     'checkobox_label' => 'Enable This feed'
                 ]
             ],
-            'integration_title'   => $this->title
+            'integration_title' => $this->title
         ];
     }
 
@@ -267,7 +284,7 @@ class Bootstrap extends IntegrationManager
 
     public function getMergeFields($list = false, $listId = false, $formId = false)
     {
-       return [];
+        return [];
     }
 
     /*
@@ -278,17 +295,16 @@ class Bootstrap extends IntegrationManager
         $feedData = $feed['processedValues'];
 
 
-
         $subscriber = [
-            'name' => ArrayHelper::get($feedData, 'lead_name'),
-            'email' => ArrayHelper::get($feedData, 'email'),
-            'phone' => ArrayHelper::get($feedData, 'phone'),
-            'created_at' => time(),
+            'name'         => ArrayHelper::get($feedData, 'lead_name'),
+            'email'        => ArrayHelper::get($feedData, 'email'),
+            'phone'        => ArrayHelper::get($feedData, 'phone'),
+            'created_at'   => time(),
             'last_seen_at' => time()
         ];
 
         $tags = ArrayHelper::get($feedData, 'tags');
-        if($tags) {
+        if ($tags) {
             $tags = explode(',', $tags);
             $formtedTags = [];
             foreach ($tags as $tag) {
@@ -297,21 +313,21 @@ class Bootstrap extends IntegrationManager
             $subscriber['tags'] = $formtedTags;
         }
 
-        if(ArrayHelper::isTrue($feedData, 'landing_url')) {
+        if (ArrayHelper::isTrue($feedData, 'landing_url')) {
             $subscriber['landing_url'] = $entry->source_url;
         }
 
-        if(ArrayHelper::isTrue($feedData, 'last_seen_ip')) {
+        if (ArrayHelper::isTrue($feedData, 'last_seen_ip')) {
             $subscriber['last_seen_ip'] = $entry->ip;
         }
 
         $subscriber = array_filter($subscriber);
 
-        if(!empty($subscriber['email']) && !is_email($subscriber['email'])) {
+        if (!empty($subscriber['email']) && !is_email($subscriber['email'])) {
             $subscriber['email'] = ArrayHelper::get($formData, $subscriber['email']);
         }
 
-        if(!is_email($subscriber['email'])) {
+        if (!is_email($subscriber['email'])) {
             return;
         }
 
@@ -322,23 +338,23 @@ class Bootstrap extends IntegrationManager
             // it's failed
             do_action('ff_log_data', [
                 'parent_source_id' => $form->id,
-                'source_type' => 'submission_item',
-                'source_id' => $entry->id,
-                'component' => $this->integrationKey,
-                'status' => 'failed',
-                'title' => $feed['settings']['name'],
-                'description' => $response->get_error_message()
+                'source_type'      => 'submission_item',
+                'source_id'        => $entry->id,
+                'component'        => $this->integrationKey,
+                'status'           => 'failed',
+                'title'            => $feed['settings']['name'],
+                'description'      => $response->get_error_message()
             ]);
         } else {
             // It's success
             do_action('ff_log_data', [
                 'parent_source_id' => $form->id,
-                'source_type' => 'submission_item',
-                'source_id' => $entry->id,
-                'component' => $this->integrationKey,
-                'status' => 'success',
-                'title' => $feed['settings']['name'],
-                'description' => 'Mautic feed has been successfully initialed and pushed data'
+                'source_type'      => 'submission_item',
+                'source_id'        => $entry->id,
+                'component'        => $this->integrationKey,
+                'status'           => 'success',
+                'title'            => $feed['settings']['name'],
+                'description'      => 'Mautic feed has been successfully initialed and pushed data'
             ]);
         }
     }
@@ -347,9 +363,9 @@ class Bootstrap extends IntegrationManager
     public function getRemoteClient()
     {
         $settings = $this->getGlobalSettings([]);
-        return new API($settings['apiUrl'],
-            $settings['username'],
-            $settings['passsword']
+        return new API(
+            $settings['apiUrl'],
+            $settings
         );
     }
 

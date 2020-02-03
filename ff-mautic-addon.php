@@ -30,39 +30,38 @@
 
 defined('ABSPATH') or die;
 define('FFMAUTIC_DIR', plugin_dir_path(__FILE__));
-include FFMAUTIC_DIR .'autoload.php';
 
 class FluentFormMautic
 {
-    protected $addOns = array(
-        'FluentFormMautic\Integrations',
-    );
 
     public function boot()
     {
         if (!defined('FLUENTFORM')) {
             return $this->injectDependency();
         }
+
+        $this->inclueFiles();
+
         if (function_exists('wpFluentForm')) {
             return $this->registerHooks(wpFluentForm());
         }
     }
 
-   
+    protected function inclueFiles()
+    {
+        include_once FFMAUTIC_DIR.'integrations/API.php';
+        include_once FFMAUTIC_DIR.'integrations/Bootstrap.php';
+    }
+
     protected function registerHooks($fluentForm)
     {
-        $this->registerAddOns($fluentForm);
+        new \FluentFormMautic\Integrations\Bootstrap($fluentForm);
     }
-    public function registerAddOns($app)
-    {
-        foreach ($this->addOns as $addOn) {
-            $class = "{$addOn}\Bootstrap";
-            new $class($app);
-        }
-    }
-      /**
-         * Notify the user about the FluentForm dependency and instructs to install it.
-         */
+
+
+    /**
+     * Notify the user about the FluentForm dependency and instructs to install it.
+     */
     protected function injectDependency()
     {
         add_action('admin_notices', function () {
@@ -114,10 +113,9 @@ class FluentFormMautic
 
         return $activation;
     }
-    
+
 }
+
 add_action('plugins_loaded', function () {
     (new FluentFormMautic())->boot();
 });
-
-
