@@ -343,7 +343,7 @@ class Bootstrap extends IntegrationManager
                 'component'        => $this->integrationKey,
                 'status'           => 'failed',
                 'title'            => $feed['settings']['name'],
-                'description'      => $response->get_error_message()
+                'description'      => 'Looks like I encountered an error (error #404)'
             ]);
         } else {
             // It's success

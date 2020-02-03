@@ -17,8 +17,9 @@ class API
     public function __construct($apiUrl, $settings)
     {
         if(substr($apiUrl, -1) == '/') {
-            $apiUrl = substr($apiUrl, -1);
+            $apiUrl = substr($apiUrl, 0, -1);
         }
+       
         $this->apiUrl = $apiUrl;
         $this->clientId = $settings['client_id'];
         $this->clientSecret = $settings['client_secret'];
@@ -183,4 +184,14 @@ class API
         }
     }
 
+    public function subscribe($subscriber) {
+
+        $response = $this->make_request('contacts/new', $subscriber, 'POST');
+
+        if($response['contact']["id"]) {
+            return $response;
+        }
+
+        return new \WP_Error('error', $response['errors']);
+    }
 }
