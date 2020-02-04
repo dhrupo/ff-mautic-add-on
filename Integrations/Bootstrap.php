@@ -27,7 +27,7 @@ class Bootstrap extends IntegrationManager
         $this->registerAdminHooks();
 
 
-        add_filter('fluentform_notifying_async_mautic', '__return_false');
+        // add_filter('fluentform_notifying_async_mautic', '__return_false');
 
         add_action('admin_init', function () {
             if(isset($_REQUEST['ff_mautic_auth'])) {
@@ -48,19 +48,6 @@ class Bootstrap extends IntegrationManager
                 } else {
                     $client->redirectToAuthServer();
                 }
-                die();
-            }
-
-            if(isset($_REQUEST['mm_test'])) {
-                $api = $this->getRemoteClient();
-
-                $contacts = $api->make_request('contacts/new', [
-                    'firstname' => 'Jewel',
-                    'lastname' => 'SHAHJAHAN',
-                    'email' => 'jl@gmail.com'
-                ], 'POST');
-
-                print_r($contacts);
                 die();
             }
 
