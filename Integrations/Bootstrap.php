@@ -187,6 +187,12 @@ class Bootstrap extends IntegrationManager
             'name'         => '',
             'list_id'      => '',
             'fields'       => (object)[],
+            'other_fields_mapping' => [
+                [
+                    'item_value' => '',
+                    'label' => ''
+                ]
+            ],
             'conditionals' => [
                 'conditions' => [],
                 'status'     => false,
@@ -217,7 +223,7 @@ class Bootstrap extends IntegrationManager
                     'label'              => 'Map Fields',
                     'tips'               => 'Select which Fluent Form fields pair with their<br /> respective Gist fields.',
                     'component'          => 'map_fields',
-                    'field_label_remote' => 'Gist Field',
+                    'field_label_remote' => 'Mautic Fields',
                     'field_label_local'  => 'Form Field',
                     'primary_fileds'     => [
                         [
@@ -239,13 +245,23 @@ class Bootstrap extends IntegrationManager
                     ]
                 ],
                 [
+                    'key'                => 'other_fields_mapping',
+                    'require_list'       => false,
+                    'label'              => 'Other Fields',
+                    'tips'               => 'Select which Fluent Form fields pair with their<br /> respective Platformly fields.',
+                    'component'          => 'dropdown_many_fields',
+                    'field_label_remote' => 'Mautic Field',
+                    'field_label_local'  => 'Mautic Field',
+                    'options'            => $this->otherFields()
+                ],
+                [
                     'key'         => 'tags',
                     'label'       => 'Lead Tags',
                     'required'    => false,
                     'placeholder' => 'Tags',
                     'component'   => 'value_text',
                     'inline_tip'  => 'Use comma separated value. You can use smart tags here'
-                ],
+                ],              
                 [
                     'key'             => 'landing_url',
                     'label'           => 'Landing URL',
@@ -285,6 +301,33 @@ class Bootstrap extends IntegrationManager
     public function getMergeFields($list = false, $listId = false, $formId = false)
     {
         return [];
+    }
+    public function otherFields() {
+            $attributes = [
+                "title" => "Title",
+                "firstname" => "FirstName",
+                "lastname" => "Last Name",
+                "company" => "Company",
+                "position" => "Position",
+                "phone" => "Phone",
+                "mobile" => "Mobile",
+                "address1" => "Address1",
+                "address2" => "Address2",
+                "city" => "City",
+                "zipcode" => "Zipcode",
+                "country" => "Country",
+                "fax" => "Fax",
+                "website" => "Website",
+                "facebook" => "Facebook",
+                "foursquare" => "Foursquare",
+                "googleplus" => "Googleplus",
+                "instagram" => "Instagram",
+                "linkedin" => "Linkedin",
+                "skype" => "Skype",
+                "twitter" => "Twitter"
+            ];
+            
+            return $attributes;
     }
 
     /*
@@ -326,6 +369,11 @@ class Bootstrap extends IntegrationManager
         if (!empty($subscriber['email']) && !is_email($subscriber['email'])) {
             $subscriber['email'] = ArrayHelper::get($formData, $subscriber['email']);
         }
+
+        foreach (ArrayHelper::get($feedData, 'other_fields_mapping') as $item) {
+            $subscriber[$item['label']] = $item['item_value'];
+        }
+
 
         if (!is_email($subscriber['email'])) {
             return;

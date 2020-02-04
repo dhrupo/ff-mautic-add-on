@@ -184,10 +184,10 @@ class API
         }
     }
 
-    public function subscribe($subscriber) {
-
+    public function subscribe($subscriber) 
+    {
         $response = $this->make_request('contacts/new', $subscriber, 'POST');
-
+       
         if($response['contact']["id"]) {
             return $response;
         }
