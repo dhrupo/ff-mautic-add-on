@@ -22,7 +22,7 @@ class Bootstrap extends IntegrationManager
 
         $this->logo = $this->app->url('public/img/integrations/mautic.png');
 
-        $this->description = 'Mautic is Easy to use all-in-one software for live chat, email marketing automation, forms, knowledge base, and more for a complete 360° view of your contacts.';
+        $this->description = 'Mautic is a fully-featured marketing automation platform that enables organizations of all sizes to send multi-channel communications at scale.';
 
         $this->registerAdminHooks();
 
@@ -71,12 +71,13 @@ class Bootstrap extends IntegrationManager
     public function getGlobalFields($fields)
     {
         return [
-            'logo'             => $this->logo,
-            'menu_title'       => __('Mautic Settings', 'fluentformpro'),
-            'menu_description' => $this->description,
-            'valid_message'    => __('Your Mautic API Key is valid', 'fluentformpro'),
-            'invalid_message'  => __('Your Mautic API Key is not valid', 'fluentformpro'),
-            'save_button_text' => __('Save Settings', 'fluentformpro'),
+            'logo'              => $this->logo,
+            'menu_title'        => __('Mautic Settings', 'fluentformpro'),
+            'menu_description'  => $this->description,
+            'valid_message'     => __('Your Mautic API Key is valid', 'fluentformpro'),
+            'invalid_message'   => __('Your Mautic API Key is not valid', 'fluentformpro'),
+            'save_button_text'  => __('Save Settings', 'fluentformpro'),
+            'config_instruction'=> $this->getConfigInstractions(),
             'fields'           => [
                 'apiUrl'        => [
                     'type'        => 'text',
@@ -205,10 +206,6 @@ class Bootstrap extends IntegrationManager
 
     public function getSettingsFields($settings, $formId)
     {
-
-        $api = $this->getRemoteClient();
-        $fields = $api->getContactFields();
-
         return [
             'fields'            => [
                 [
@@ -303,28 +300,29 @@ class Bootstrap extends IntegrationManager
         return [];
     }
     public function otherFields() {
+        // BIND STATIC CAUSE SOME FIELDS ARE NOT SUPPORTED
             $attributes = [
-                "title" => "Title",
-                "firstname" => "FirstName",
-                "lastname" => "Last Name",
-                "company" => "Company",
-                "position" => "Position",
-                "phone" => "Phone",
-                "mobile" => "Mobile",
-                "address1" => "Address1",
-                "address2" => "Address2",
-                "city" => "City",
-                "zipcode" => "Zipcode",
-                "country" => "Country",
-                "fax" => "Fax",
-                "website" => "Website",
-                "facebook" => "Facebook",
-                "foursquare" => "Foursquare",
-                "googleplus" => "Googleplus",
-                "instagram" => "Instagram",
-                "linkedin" => "Linkedin",
-                "skype" => "Skype",
-                "twitter" => "Twitter"
+                "title"       => "Title",
+                "firstname"   => "FirstName",
+                "lastname"    => "Last Name",
+                "company"     => "Company",
+                "position"    => "Position",
+                "phone"       => "Phone",
+                "mobile"      => "Mobile",
+                "address1"    => "Address1",
+                "address2"    => "Address2",
+                "city"        => "City",
+                "zipcode"     => "Zipcode",
+                "country"     => "Country",
+                "fax"         => "Fax",
+                "website"     => "Website",
+                "facebook"    => "Facebook",
+                "foursquare"  => "Foursquare",
+                "googleplus"  => "Googleplus",
+                "instagram"   => "Instagram",
+                "linkedin"    => "Linkedin",
+                "skype"       => "Skype",
+                "twitter"     => "Twitter"
             ];
             
             return $attributes;
@@ -381,7 +379,7 @@ class Bootstrap extends IntegrationManager
 
         $api = $this->getRemoteClient();
         $response = $api->subscribe($subscriber);
-
+  
         if (is_wp_error($response)) {
             // it's failed
             do_action('ff_log_data', [
@@ -391,7 +389,7 @@ class Bootstrap extends IntegrationManager
                 'component'        => $this->integrationKey,
                 'status'           => 'failed',
                 'title'            => $feed['settings']['name'],
-                'description'      => 'Looks like I encountered an error (error #404)'
+                'description'      => $response->errors['error'][0][0]['message']
             ]);
         } else {
             // It's success
@@ -407,6 +405,25 @@ class Bootstrap extends IntegrationManager
         }
     }
 
+
+    protected function getConfigInstractions()
+    {
+        ob_start();
+        ?>
+        <div><h4>To Authenticate Mautic you have to enable your API first</h4>
+            <ol>
+                <li>Go to Your Mautic account dashboard, Click on the gear icon next to the username on top right corner. 
+                Click on Configuration settings >> Api settings and enable the Api</li>
+                <li>Then go to "Api Credentials" and create a new oAuth 2 credentials with a redirect url (Your site dashboard url with this slug /?ff_mautic_auth=1)<br/>
+                    Redirect url should look like <b>https://example.com/wp-admin/?ff_mautic_auth=1</b> 
+                    
+                </li>
+                <li>Paste your Mautic account URL on Mautic API URL, also paste the Client Id and Secret Id. Then click save settings.</li>
+            </ol>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 
     public function getRemoteClient()
     {

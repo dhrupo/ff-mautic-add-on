@@ -116,17 +116,6 @@ class API
         return $body;
     }
 
-
-    public function getContactFields()
-    {
-        $settings = $this->getApiSettings();
-        $url = $this->apiUrl.'/index.php/api/contacts?access_token='.$settings['access_token'];
-        $response =  wp_remote_get($url);
-        $contacts = wp_remote_retrieve_body($response);
-        $contacts = \json_decode($contacts, true);
-        return $contacts;
-    }
-
     protected function getApiSettings()
     {
         $this->maybeRefreshToken();
