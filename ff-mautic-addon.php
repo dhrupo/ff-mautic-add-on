@@ -40,14 +40,14 @@ class FluentFormMautic
             return $this->injectDependency();
         }
 
-        $this->inclueFiles();
+        $this->includeFiles();
 
         if (function_exists('wpFluentForm')) {
             return $this->registerHooks(wpFluentForm());
         }
     }
 
-    protected function inclueFiles()
+    protected function includeFiles()
     {
         include_once FFMAUTIC_DIR.'integrations/API.php';
         include_once FFMAUTIC_DIR.'integrations/Bootstrap.php';
