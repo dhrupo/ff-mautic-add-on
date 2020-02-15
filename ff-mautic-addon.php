@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FluentForm Mautic add on
  * Plugin URI:  https://wpmanageninja.com/
- * Description: add form data on mautic by ff pro
+ * Description: Integrate your mautic with Fluentform.
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
  * Version: 1.0.0
