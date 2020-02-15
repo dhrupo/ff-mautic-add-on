@@ -75,7 +75,7 @@ class FluentFormMautic
                 $install_url_text = 'Click Here to Activate the Plugin';
             }
 
-            $message = 'FluentForm Mautic Add-On Requires Fluent Forms Pro Add On Plugin, <b><a href="' . $pluginInfo->url
+            $message = 'FluentForm Mautic Add-On Requires Fluent Forms Add On Plugin, <b><a href="' . $pluginInfo->url
                 . '">' . $install_url_text . '</a></b>';
 
             printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), $message);
