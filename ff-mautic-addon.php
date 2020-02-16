@@ -49,8 +49,8 @@ class FluentFormMautic
 
     protected function includeFiles()
     {
-        include_once FFMAUTIC_DIR.'integrations/API.php';
-        include_once FFMAUTIC_DIR.'integrations/Bootstrap.php';
+        include_once FFMAUTIC_DIR.'Integrations/API.php';
+        include_once FFMAUTIC_DIR.'Integrations/Bootstrap.php';
     }
 
     protected function registerHooks($fluentForm)
