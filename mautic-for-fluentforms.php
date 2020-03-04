@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: FluentForm Mautic add on
- * Plugin URI:  https://wpmanageninja.com/
+ * Plugin Name: Mautic For Fluent Forms
+ * Plugin URI:  https://github.com/hasanuzzamanbe/ff-mautic-add-on
  * Description: Integrate your mautic with Fluentform.
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com

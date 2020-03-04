@@ -30,15 +30,15 @@ class Bootstrap extends IntegrationManager
         // add_filter('fluentform_notifying_async_mautic', '__return_false');
 
         add_action('admin_init', function () {
-            if(isset($_REQUEST['ff_mautic_auth'])) {
+            if (isset($_REQUEST['ff_mautic_auth'])) {
                 $client = $this->getRemoteClient();
-                if(isset($_REQUEST['code'])) {
+                if (isset($_REQUEST['code'])) {
                     // Get the access token now
                     $code = sanitize_text_field($_REQUEST['code']);
                     $settings = $this->getGlobalSettings([]);
                     $settings = $client->generateAccessToken($code, $settings);
 
-                    if(!is_wp_error($settings)) {
+                    if (!is_wp_error($settings)) {
                         $settings['status'] = true;
                         update_option($this->optionKey, $settings, 'no');
                     }
@@ -58,43 +58,43 @@ class Bootstrap extends IntegrationManager
     public function getGlobalFields($fields)
     {
         return [
-            'logo'              => $this->logo,
-            'menu_title'        => __('Mautic Settings', 'fluentformpro'),
-            'menu_description'  => $this->description,
-            'valid_message'     => __('Your Mautic API Key is valid', 'fluentformpro'),
-            'invalid_message'   => __('Your Mautic API Key is not valid', 'fluentformpro'),
-            'save_button_text'  => __('Save Settings', 'fluentformpro'),
-            'config_instruction'=> $this->getConfigInstractions(),
-            'fields'           => [
-                'apiUrl'        => [
-                    'type'        => 'text',
+            'logo' => $this->logo,
+            'menu_title' => __('Mautic Settings', 'ffmauticaddon'),
+            'menu_description' => $this->description,
+            'valid_message' => __('Your Mautic API Key is valid', 'ffmauticaddon'),
+            'invalid_message' => __('Your Mautic API Key is not valid', 'ffmauticaddon'),
+            'save_button_text' => __('Save Settings', 'ffmauticaddon'),
+            'config_instruction' => $this->getConfigInstractions(),
+            'fields' => [
+                'apiUrl' => [
+                    'type' => 'text',
                     'placeholder' => 'Your Mautic Installation URL',
-                    'label_tips'  => __("Please provide your Mautic Installation URL", 'fluentformpro'),
-                    'label'       => __('Your Moutic API URL', 'fluentformpro'),
+                    'label_tips' => __("Please provide your Mautic Installation URL", 'ffmauticaddon'),
+                    'label' => __('Your Moutic API URL', 'ffmauticaddon'),
                 ],
-                'client_id'     => [
-                    'type'        => 'text',
+                'client_id' => [
+                    'type' => 'text',
                     'placeholder' => 'Mautic App Client ID',
-                    'label_tips'  => __("Enter your Mautic Client ID, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
-                    'label'       => __('Mautic Client ID', 'fluentformpro'),
+                    'label_tips' => __("Enter your Mautic Client ID, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'ffmauticaddon'),
+                    'label' => __('Mautic Client ID', 'ffmauticaddon'),
                 ],
                 'client_secret' => [
-                    'type'        => 'password',
+                    'type' => 'password',
                     'placeholder' => 'Mautic App Client Secret',
-                    'label_tips'  => __("Enter your Mautic API Key, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'fluentformpro'),
-                    'label'       => __('Mautic Client Secret', 'fluentformpro'),
+                    'label_tips' => __("Enter your Mautic API Key, if you do not have <br>Please login to your Mautic account and go to<br>Settings -> Integrations -> API key", 'ffmauticaddon'),
+                    'label' => __('Mautic Client Secret', 'ffmauticaddon'),
                 ],
             ],
-            'hide_on_valid'    => true,
+            'hide_on_valid' => true,
             'discard_settings' => [
                 'section_description' => 'Your Mautic API integration is up and running',
-                'button_text'         => 'Disconnect Mautic',
-                'data'                => [
-                    'apiUrl'        => '',
-                    'client_id'     => '',
+                'button_text' => 'Disconnect Mautic',
+                'data' => [
+                    'apiUrl' => '',
+                    'client_id' => '',
                     'client_secret' => ''
                 ],
-                'show_verify'         => true
+                'show_verify' => true
             ]
         ];
     }
@@ -106,10 +106,10 @@ class Bootstrap extends IntegrationManager
             $globalSettings = [];
         }
         $defaults = [
-            'apiUrl'        => '',
-            'client_id'     => '',
+            'apiUrl' => '',
+            'client_id' => '',
             'client_secret' => '',
-            'status'    => '',
+            'status' => '',
             'access_token' => '',
             'refresh_token' => '',
             'expire_at' => false
@@ -122,16 +122,16 @@ class Bootstrap extends IntegrationManager
     {
         if (empty($settings['apiUrl'])) {
             $integrationSettings = [
-                'apiUrl'        => '',
-                'client_id'     => '',
+                'apiUrl' => '',
+                'client_id' => '',
                 'client_secret' => '',
-                'status'    => false
+                'status' => false
             ];
             // Update the details with siteKey & secretKey.
             update_option($this->optionKey, $integrationSettings, 'no');
             wp_send_json_success([
-                'message' => __('Your settings has been updated', 'fluentformpro'),
-                'status'  => false
+                'message' => __('Your settings has been updated', 'ffmauticaddon'),
+                'status' => false
             ], 200);
         }
 
@@ -145,7 +145,7 @@ class Bootstrap extends IntegrationManager
 
             update_option($this->optionKey, $oldSettings, 'no');
             wp_send_json_success([
-                'message'      => 'You are redirect to athenticate',
+                'message' => 'You are redirect to athenticate',
                 'redirect_url' => admin_url('?ff_mautic_auth=1')
             ], 200);
         } catch (\Exception $exception) {
@@ -158,12 +158,12 @@ class Bootstrap extends IntegrationManager
     public function pushIntegration($integrations, $formId)
     {
         $integrations[$this->integrationKey] = [
-            'title'                 => $this->title . ' Integration',
-            'logo'                  => $this->logo,
-            'is_active'             => $this->isConfigured(),
-            'configure_title'       => 'Configration required!',
-            'global_configure_url'  => admin_url('admin.php?page=fluent_forms_settings#general-getgist-settings'),
-            'configure_message'     => 'Mautic is not configured yet! Please configure your Mautic api first',
+            'title' => $this->title . ' Integration',
+            'logo' => $this->logo,
+            'is_active' => $this->isConfigured(),
+            'configure_title' => 'Configration required!',
+            'global_configure_url' => admin_url('admin.php?page=fluent_forms_settings#general-getgist-settings'),
+            'configure_message' => 'Mautic is not configured yet! Please configure your Mautic api first',
             'configure_button_text' => 'Set Mautic API'
         ];
         return $integrations;
@@ -172,9 +172,9 @@ class Bootstrap extends IntegrationManager
     public function getIntegrationDefaults($settings, $formId)
     {
         return [
-            'name'         => '',
-            'list_id'      => '',
-            'fields'       => (object)[],
+            'name' => '',
+            'list_id' => '',
+            'fields' => (object)[],
             'other_fields_mapping' => [
                 [
                     'item_value' => '',
@@ -183,93 +183,93 @@ class Bootstrap extends IntegrationManager
             ],
             'conditionals' => [
                 'conditions' => [],
-                'status'     => false,
-                'type'       => 'all'
+                'status' => false,
+                'type' => 'all'
             ],
-            'resubscribe'  => false,
-            'enabled'      => true
+            'resubscribe' => false,
+            'enabled' => true
         ];
     }
 
     public function getSettingsFields($settings, $formId)
     {
         return [
-            'fields'            => [
+            'fields' => [
                 [
-                    'key'         => 'name',
-                    'label'       => 'Feed Name',
-                    'required'    => true,
+                    'key' => 'name',
+                    'label' => 'Feed Name',
+                    'required' => true,
                     'placeholder' => 'Your Feed Name',
-                    'component'   => 'text'
+                    'component' => 'text'
                 ],
                 [
-                    'key'                => 'fields',
-                    'label'              => 'Map Fields',
-                    'tips'               => 'Select which Fluent Form fields pair with their<br /> respective Gist fields.',
-                    'component'          => 'map_fields',
+                    'key' => 'fields',
+                    'label' => 'Map Fields',
+                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Gist fields.',
+                    'component' => 'map_fields',
                     'field_label_remote' => 'Mautic Fields',
-                    'field_label_local'  => 'Form Field',
-                    'primary_fileds'     => [
+                    'field_label_local' => 'Form Field',
+                    'primary_fileds' => [
                         [
-                            'key'           => 'email',
-                            'label'         => 'Email Address',
-                            'required'      => true,
+                            'key' => 'email',
+                            'label' => 'Email Address',
+                            'required' => true,
                             'input_options' => 'emails'
                         ],
                         [
-                            'key'      => 'lead_name',
-                            'label'    => 'Name',
+                            'key' => 'lead_name',
+                            'label' => 'Name',
                             'required' => false
                         ],
                         [
-                            'key'      => 'lead_phone',
-                            'label'    => 'Phone',
+                            'key' => 'lead_phone',
+                            'label' => 'Phone',
                             'required' => false
                         ]
                     ]
                 ],
                 [
-                    'key'                => 'other_fields_mapping',
-                    'require_list'       => false,
-                    'label'              => 'Other Fields',
-                    'tips'               => 'Select which Fluent Form fields pair with their<br /> respective Platformly fields.',
-                    'component'          => 'dropdown_many_fields',
+                    'key' => 'other_fields_mapping',
+                    'require_list' => false,
+                    'label' => 'Other Fields',
+                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Platformly fields.',
+                    'component' => 'dropdown_many_fields',
                     'field_label_remote' => 'Mautic Field',
-                    'field_label_local'  => 'Mautic Field',
-                    'options'            => $this->otherFields()
+                    'field_label_local' => 'Mautic Field',
+                    'options' => $this->otherFields()
                 ],
                 [
-                    'key'         => 'tags',
-                    'label'       => 'Lead Tags',
-                    'required'    => false,
+                    'key' => 'tags',
+                    'label' => 'Lead Tags',
+                    'required' => false,
                     'placeholder' => 'Tags',
-                    'component'   => 'value_text',
-                    'inline_tip'  => 'Use comma separated value. You can use smart tags here'
-                ],              
+                    'component' => 'value_text',
+                    'inline_tip' => 'Use comma separated value. You can use smart tags here'
+                ],
                 [
-                    'key'             => 'landing_url',
-                    'label'           => 'Landing URL',
-                    'tips'            => 'When this option is enabled, FluentForm will pass the form page url to the gist lead',
-                    'component'       => 'checkbox-single',
+                    'key' => 'landing_url',
+                    'label' => 'Landing URL',
+                    'tips' => 'When this option is enabled, FluentForm will pass the form page url to the gist lead',
+                    'component' => 'checkbox-single',
                     'checkobox_label' => 'Enable Landing URL'
                 ],
                 [
-                    'key'             => 'last_seen_ip',
-                    'label'           => 'Push IP Address',
-                    'tips'            => 'When this option is enabled, FluentForm will pass the last_seen_ip to gist',
-                    'component'       => 'checkbox-single',
+                    'key' => 'last_seen_ip',
+                    'label' => 'Push IP Address',
+                    'tips' => 'When this option is enabled, FluentForm will pass the last_seen_ip to gist',
+                    'component' => 'checkbox-single',
                     'checkobox_label' => 'Enable last IP address'
                 ],
                 [
-                    'key'       => 'conditionals',
-                    'label'     => 'Conditional Logics',
-                    'tips'      => 'Allow Gist integration conditionally based on your submission values',
+                    'key' => 'conditionals',
+                    'label' => 'Conditional Logics',
+                    'tips' => 'Allow Gist integration conditionally based on your submission values',
                     'component' => 'conditional_block'
                 ],
                 [
-                    'key'             => 'enabled',
-                    'label'           => 'Status',
-                    'component'       => 'checkbox-single',
+                    'key' => 'enabled',
+                    'label' => 'Status',
+                    'component' => 'checkbox-single',
                     'checkobox_label' => 'Enable This feed'
                 ]
             ],
@@ -286,33 +286,35 @@ class Bootstrap extends IntegrationManager
     {
         return [];
     }
-    public function otherFields() {
+
+    public function otherFields()
+    {
         // BIND STATIC CAUSE SOME FIELDS ARE NOT SUPPORTED
-            $attributes = [
-                "title"       => "Title",
-                "firstname"   => "FirstName",
-                "lastname"    => "Last Name",
-                "company"     => "Company",
-                "position"    => "Position",
-                "phone"       => "Phone",
-                "mobile"      => "Mobile",
-                "address1"    => "Address1",
-                "address2"    => "Address2",
-                "city"        => "City",
-                "zipcode"     => "Zipcode",
-                "country"     => "Country",
-                "fax"         => "Fax",
-                "website"     => "Website",
-                "facebook"    => "Facebook",
-                "foursquare"  => "Foursquare",
-                "googleplus"  => "Googleplus",
-                "instagram"   => "Instagram",
-                "linkedin"    => "Linkedin",
-                "skype"       => "Skype",
-                "twitter"     => "Twitter"
-            ];
-            
-            return $attributes;
+        $attributes = [
+            "title" => "Title",
+            "firstname" => "FirstName",
+            "lastname" => "Last Name",
+            "company" => "Company",
+            "position" => "Position",
+            "phone" => "Phone",
+            "mobile" => "Mobile",
+            "address1" => "Address1",
+            "address2" => "Address2",
+            "city" => "City",
+            "zipcode" => "Zipcode",
+            "country" => "Country",
+            "fax" => "Fax",
+            "website" => "Website",
+            "facebook" => "Facebook",
+            "foursquare" => "Foursquare",
+            "googleplus" => "Googleplus",
+            "instagram" => "Instagram",
+            "linkedin" => "Linkedin",
+            "skype" => "Skype",
+            "twitter" => "Twitter"
+        ];
+
+        return $attributes;
     }
 
     /*
@@ -324,10 +326,10 @@ class Bootstrap extends IntegrationManager
 
 
         $subscriber = [
-            'name'         => ArrayHelper::get($feedData, 'lead_name'),
-            'email'        => ArrayHelper::get($feedData, 'email'),
-            'phone'        => ArrayHelper::get($feedData, 'phone'),
-            'created_at'   => time(),
+            'name' => ArrayHelper::get($feedData, 'lead_name'),
+            'email' => ArrayHelper::get($feedData, 'email'),
+            'phone' => ArrayHelper::get($feedData, 'phone'),
+            'created_at' => time(),
             'last_seen_at' => time()
         ];
 
@@ -366,28 +368,28 @@ class Bootstrap extends IntegrationManager
 
         $api = $this->getRemoteClient();
         $response = $api->subscribe($subscriber);
-  
+
         if (is_wp_error($response)) {
             // it's failed
             do_action('ff_log_data', [
                 'parent_source_id' => $form->id,
-                'source_type'      => 'submission_item',
-                'source_id'        => $entry->id,
-                'component'        => $this->integrationKey,
-                'status'           => 'failed',
-                'title'            => $feed['settings']['name'],
-                'description'      => $response->errors['error'][0][0]['message']
+                'source_type' => 'submission_item',
+                'source_id' => $entry->id,
+                'component' => $this->integrationKey,
+                'status' => 'failed',
+                'title' => $feed['settings']['name'],
+                'description' => $response->errors['error'][0][0]['message']
             ]);
         } else {
             // It's success
             do_action('ff_log_data', [
                 'parent_source_id' => $form->id,
-                'source_type'      => 'submission_item',
-                'source_id'        => $entry->id,
-                'component'        => $this->integrationKey,
-                'status'           => 'success',
-                'title'            => $feed['settings']['name'],
-                'description'      => 'Mautic feed has been successfully initialed and pushed data'
+                'source_type' => 'submission_item',
+                'source_id' => $entry->id,
+                'component' => $this->integrationKey,
+                'status' => 'success',
+                'title' => $feed['settings']['name'],
+                'description' => 'Mautic feed has been successfully initialed and pushed data'
             ]);
         }
     }
@@ -398,13 +400,18 @@ class Bootstrap extends IntegrationManager
         ?>
         <div><h4>To Authenticate Mautic you have to enable your API first</h4>
             <ol>
-                <li>Go to Your Mautic account dashboard, Click on the gear icon next to the username on top right corner. 
-                Click on Configuration settings >> Api settings and enable the Api</li>
-                <li>Then go to "Api Credentials" and create a new oAuth 2 credentials with a redirect url (Your site dashboard url with this slug /?ff_mautic_auth=1)<br/>
-                   Your app redirect url will be <b><?php echo admin_url('?ff_mautic_auth=1'); ?></b> 
-                    
+                <li>Go to Your Mautic account dashboard, Click on the gear icon next to the username on top right
+                    corner.
+                    Click on Configuration settings >> Api settings and enable the Api
                 </li>
-                <li>Paste your Mautic account URL on Mautic API URL, also paste the Client Id and Secret Id. Then click save settings.</li>
+                <li>Then go to "Api Credentials" and create a new oAuth 2 credentials with a redirect url (Your site
+                    dashboard url with this slug /?ff_mautic_auth=1)<br/>
+                    Your app redirect url will be <b><?php echo admin_url('?ff_mautic_auth=1'); ?></b>
+
+                </li>
+                <li>Paste your Mautic account URL on Mautic API URL, also paste the Client Id and Secret Id. Then click
+                    save settings.
+                </li>
             </ol>
         </div>
         <?php
