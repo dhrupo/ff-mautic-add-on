@@ -1,4 +1,4 @@
-# ff-mautic-add-on
+# Mautic Integration Addon for Fluent Forms
 
 ## setup :
 

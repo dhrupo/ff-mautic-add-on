@@ -113,8 +113,17 @@ class FluentFormMautic
 
         return $activation;
     }
-
 }
+
+register_activation_hook( __FILE__, function () {
+    $globalModules = get_option('fluentform_global_modules_status');
+    if(!$globalModules || !is_array($globalModules)) {
+        $globalModules = [];
+    }
+
+    $globalModules['mautic'] = 'yes';
+    update_option('fluentform_global_modules_status', $globalModules);
+});
 
 add_action('plugins_loaded', function () {
     (new FluentFormMautic())->boot();
