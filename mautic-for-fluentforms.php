@@ -5,7 +5,7 @@
  * Description: Integrate your mautic with Fluentform.
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
- * Version: 1.0.0
+ * Version: 1.0.1
  * Text Domain: ffmauticaddon
  */
 
@@ -91,16 +91,16 @@ class FluentFormMautic
 
         $allPlugins = get_plugins();
 
-        if (isset($allPlugins['fluentformpro/fluentformpro.php'])) {
+        if (isset($allPlugins['fluentform/fluentform.php'])) {
             $url = wp_nonce_url(
-                self_admin_url('plugins.php?action=activate&plugin=fluentformpro/fluentformpro.php'),
-                'activate-plugin_fluentformpro/fluentformpro.php'
+                self_admin_url('plugins.php?action=activate&plugin=fluentform/fluentform.php'),
+                'activate-plugin_fluentform/fluentform.php'
             );
 
             $activation->action = 'activate';
         } else {
             $api = (object)[
-                'slug' => 'fluentformpro'
+                'slug' => 'fluentform'
             ];
 
             $url = wp_nonce_url(

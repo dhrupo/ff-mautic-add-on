@@ -1,4 +1,4 @@
-=== Mautic For Fluent Forms  ===
+=== Mautic Integration For Fluent Forms  ===
 Contributors: techjewel,wpmanageninja,hasanuzzamanshamim
 Tags: Integration, Mautic
 Requires at least: 5.0
