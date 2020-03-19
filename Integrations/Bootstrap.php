@@ -205,7 +205,7 @@ class Bootstrap extends IntegrationManager
                 [
                     'key' => 'fields',
                     'label' => 'Map Fields',
-                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Gist fields.',
+                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Mautic fields.',
                     'component' => 'map_fields',
                     'field_label_remote' => 'Mautic Fields',
                     'field_label_local' => 'Form Field',
@@ -232,7 +232,7 @@ class Bootstrap extends IntegrationManager
                     'key' => 'other_fields_mapping',
                     'require_list' => false,
                     'label' => 'Other Fields',
-                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Platformly fields.',
+                    'tips' => 'Select which Fluent Form fields pair with their<br /> respective Mautic fields.',
                     'component' => 'dropdown_many_fields',
                     'field_label_remote' => 'Mautic Field',
                     'field_label_local' => 'Mautic Field',
@@ -249,21 +249,21 @@ class Bootstrap extends IntegrationManager
                 [
                     'key' => 'landing_url',
                     'label' => 'Landing URL',
-                    'tips' => 'When this option is enabled, FluentForm will pass the form page url to the gist lead',
+                    'tips' => 'When this option is enabled, FluentForm will pass the form page url to the Mautic lead',
                     'component' => 'checkbox-single',
                     'checkobox_label' => 'Enable Landing URL'
                 ],
                 [
                     'key' => 'last_seen_ip',
                     'label' => 'Push IP Address',
-                    'tips' => 'When this option is enabled, FluentForm will pass the last_seen_ip to gist',
+                    'tips' => 'When this option is enabled, FluentForm will pass the last_seen_ip to Mautic',
                     'component' => 'checkbox-single',
                     'checkobox_label' => 'Enable last IP address'
                 ],
                 [
                     'key' => 'conditionals',
                     'label' => 'Conditional Logics',
-                    'tips' => 'Allow Gist integration conditionally based on your submission values',
+                    'tips' => 'Allow Mautic integration conditionally based on your submission values',
                     'component' => 'conditional_block'
                 ],
                 [
