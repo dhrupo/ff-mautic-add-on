@@ -202,6 +202,7 @@ class Bootstrap extends IntegrationManager
                     'placeholder' => 'Your Feed Name',
                     'component' => 'text'
                 ],
+                
                 [
                     'key' => 'fields',
                     'label' => 'Map Fields',
@@ -215,16 +216,6 @@ class Bootstrap extends IntegrationManager
                             'label' => 'Email Address',
                             'required' => true,
                             'input_options' => 'emails'
-                        ],
-                        [
-                            'key' => 'lead_name',
-                            'label' => 'Name',
-                            'required' => false
-                        ],
-                        [
-                            'key' => 'lead_phone',
-                            'label' => 'Phone',
-                            'required' => false
                         ]
                     ]
                 ],
