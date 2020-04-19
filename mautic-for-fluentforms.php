@@ -5,7 +5,7 @@
  * Description: Integrate your mautic with Fluentform.
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
- * Version: 1.0.1
+ * Version: 1.0.2
  * Text Domain: ffmauticaddon
  */
 

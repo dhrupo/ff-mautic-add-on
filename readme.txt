@@ -1,10 +1,10 @@
 === Mautic Integration For Fluent Forms  ===
 Contributors: techjewel,wpmanageninja,hasanuzzamanshamim
-Tags: Integration, Mautic
+Tags: Integration, Mautic, Form, Integration
 Requires at least: 5.0
-Tested up to: 5.3.2
+Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: trunk
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Install From WordPress Admin Panel:
 4. Single form mapping with Mautic
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix Name fields sync
+* Fix Few labels
 
 = 1.0.0 =
 * Init Release
