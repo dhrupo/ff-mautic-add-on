@@ -162,7 +162,7 @@ class Bootstrap extends IntegrationManager
             'logo' => $this->logo,
             'is_active' => $this->isConfigured(),
             'configure_title' => 'Configration required!',
-            'global_configure_url' => admin_url('admin.php?page=fluent_forms_settings#general-getgist-settings'),
+            'global_configure_url' => admin_url('admin.php?page=fluent_forms_settings#general-mautic-settings'),
             'configure_message' => 'Mautic is not configured yet! Please configure your Mautic api first',
             'configure_button_text' => 'Set Mautic API'
         ];
