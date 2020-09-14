@@ -16,7 +16,7 @@ class API
 
     public function __construct($apiUrl, $settings)
     {
-        if(substr($apiUrl, -1) == '/') {
+        if (substr($apiUrl, -1) == '/') {
             $apiUrl = substr($apiUrl, 0, -1);
         }
        
@@ -53,14 +53,14 @@ class API
             ]
         ]);
 
-        if(is_wp_error($response)) {
+        if (is_wp_error($response)) {
             return $response;
         }
 
         $body = wp_remote_retrieve_body($response);
         $body = \json_decode($body, true);
 
-        if(isset($body['error_description'])) {
+        if (isset($body['error_description'])) {
             return new \WP_Error('invalid_client', $body['error_description']);
         }
 
@@ -70,10 +70,10 @@ class API
         return $settings;
     }
 
-    public function make_request($action, $data = array(), $method = 'GET')
+    public function makeRequest($action, $data = array(), $method = 'GET')
     {
         $settings = $this->getApiSettings();
-        if(is_wp_error($settings)) {
+        if (is_wp_error($settings)) {
             return $settings;
         }
 
@@ -81,30 +81,30 @@ class API
 
         $data['access_token'] = $settings['access_token'];
         $response = false;
-        if($method == 'GET') {
+        if ($method == 'GET') {
             $url = add_query_arg($data, $url);
             $response = wp_remote_get($url);
-        } else if($method == 'POST') {
+        } else if ($method == 'POST') {
             $response = wp_remote_post($url, [
                 'body' => $data
             ]);
         }
 
-        if(!$response) {
+        if (!$response) {
             return new \WP_Error('invalid', 'Request could not be performed');
         }
 
-        if(is_wp_error($response)) {
+        if (is_wp_error($response)) {
             return new \WP_Error('wp_error', $response->get_error_message());
         }
 
         $body = wp_remote_retrieve_body($response);
         $body = \json_decode($body, true);
 
-        if(isset($body['errrors'])) {
-            if(!empty($body['errrors'][0]['description'])) {
+        if (isset($body['errrors'])) {
+            if (!empty($body['errrors'][0]['description'])) {
                 $message = $body['errrors'][0]['description'];
-            } else if(!empty($body['error_description'])) {
+            } else if (!empty($body['error_description'])) {
                 $message = $body['error_description'];
             } else {
                 $message = 'Error when requesting to API Server';
@@ -122,7 +122,7 @@ class API
 
         $apiSettings = $this->settings;
 
-        if(!$apiSettings['status'] || !$apiSettings['expire_at']) {
+        if (!$apiSettings['status'] || !$apiSettings['expire_at']) {
             return new \WP_Error('invalid', 'API key is invalid');
         }
 
@@ -143,7 +143,7 @@ class API
         $settings = $this->settings;
         $expireAt = $settings['expire_at'];
 
-        if( $expireAt && $expireAt <= (time() - 10) ) {
+        if ($expireAt && $expireAt <= (time() - 10)) {
             // we have to regenerate the tokens
             $response = wp_remote_post($this->apiUrl.'/oauth/v2/token', [
                 'body' => [
@@ -155,14 +155,14 @@ class API
                 ]
             ]);
 
-            if(is_wp_error($response)) {
+            if (is_wp_error($response)) {
                 $settings['status'] = false;
             }
 
             $body = wp_remote_retrieve_body($response);
             $body = \json_decode($body, true);
 
-            if(isset($body['error_description'])) {
+            if (isset($body['error_description'])) {
                 $settings['status'] = false;
             }
             $settings['access_token'] = $body['access_token'];
@@ -173,11 +173,11 @@ class API
         }
     }
 
-    public function subscribe($subscriber) 
+    public function subscribe($subscriber)
     {
-        $response = $this->make_request('contacts/new', $subscriber, 'POST');
+        $response = $this->makeRequest('contacts/new', $subscriber, 'POST');
        
-        if($response['contact']["id"]) {
+        if ($response['contact']["id"]) {
             return $response;
         }
 

@@ -27,7 +27,7 @@ class Bootstrap extends IntegrationManager
         $this->registerAdminHooks();
 
 
-        // add_filter('fluentform_notifying_async_mautic', '__return_false');
+        add_filter('fluentform_notifying_async_mautic', '__return_false');
 
         add_action('admin_init', function () {
             if (isset($_REQUEST['ff_mautic_auth'])) {

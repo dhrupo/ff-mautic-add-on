@@ -115,9 +115,9 @@ class FluentFormMautic
     }
 }
 
-register_activation_hook( __FILE__, function () {
+register_activation_hook(__FILE__, function () {
     $globalModules = get_option('fluentform_global_modules_status');
-    if(!$globalModules || !is_array($globalModules)) {
+    if (!$globalModules || !is_array($globalModules)) {
         $globalModules = [];
     }
 
