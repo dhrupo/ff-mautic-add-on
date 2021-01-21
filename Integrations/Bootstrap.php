@@ -161,7 +161,7 @@ class Bootstrap extends IntegrationManager
             'title' => $this->title . ' Integration',
             'logo' => $this->logo,
             'is_active' => $this->isConfigured(),
-            'configure_title' => 'Configration required!',
+            'configure_title' => 'Configuration required!',
             'global_configure_url' => admin_url('admin.php?page=fluent_forms_settings#general-mautic-settings'),
             'configure_message' => 'Mautic is not configured yet! Please configure your Mautic api first',
             'configure_button_text' => 'Set Mautic API'
@@ -202,7 +202,7 @@ class Bootstrap extends IntegrationManager
                     'placeholder' => 'Your Feed Name',
                     'component' => 'text'
                 ],
-                
+
                 [
                     'key' => 'fields',
                     'label' => 'Map Fields',
@@ -242,14 +242,14 @@ class Bootstrap extends IntegrationManager
                     'label' => 'Landing URL',
                     'tips' => 'When this option is enabled, FluentForm will pass the form page url to the Mautic lead',
                     'component' => 'checkbox-single',
-                    'checkobox_label' => 'Enable Landing URL'
+                    'checkbox_label' => 'Enable Landing URL'
                 ],
                 [
                     'key' => 'last_seen_ip',
                     'label' => 'Push IP Address',
                     'tips' => 'When this option is enabled, FluentForm will pass the last_seen_ip to Mautic',
                     'component' => 'checkbox-single',
-                    'checkobox_label' => 'Enable last IP address'
+                    'checkbox_label' => 'Enable last IP address'
                 ],
                 [
                     'key' => 'conditionals',
@@ -261,7 +261,7 @@ class Bootstrap extends IntegrationManager
                     'key' => 'enabled',
                     'label' => 'Status',
                     'component' => 'checkbox-single',
-                    'checkobox_label' => 'Enable This feed'
+                    'checkbox_label' => 'Enable This feed'
                 ]
             ],
             'integration_title' => $this->title
