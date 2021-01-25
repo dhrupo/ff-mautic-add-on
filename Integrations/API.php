@@ -19,7 +19,7 @@ class API
         if (substr($apiUrl, -1) == '/') {
             $apiUrl = substr($apiUrl, 0, -1);
         }
-       
+
         $this->apiUrl = $apiUrl;
         $this->clientId = $settings['client_id'];
         $this->clientSecret = $settings['client_secret'];
@@ -155,32 +155,31 @@ class API
                 ]
             ]);
 
-            if (is_wp_error($response)) {
-                $settings['status'] = false;
-            }
-
             $body = wp_remote_retrieve_body($response);
             $body = \json_decode($body, true);
 
-            if (isset($body['error_description'])) {
-                $settings['status'] = false;
+            if (!is_wp_error($response) || !isset($body['errors'])) {
+                $settings['access_token'] = $body['access_token'];
+                $settings['refresh_token'] = $body['refresh_token'];
+                $settings['expire_at'] = time() + intval($body['expires_in']);
+                $this->settings = $settings;
+                update_option('_fluentform_mautic_settings', $settings, 'no');
             }
-            $settings['access_token'] = $body['access_token'];
-            $settings['refresh_token'] = $body['refresh_token'];
-            $settings['expire_at'] = time() + intval($body['expires_in']);
-            $this->settings = $settings;
-            update_option('_fluentform_mautic_settings', $settings, 'no');
         }
     }
 
     public function subscribe($subscriber)
     {
         $response = $this->makeRequest('contacts/new', $subscriber, 'POST');
-       
+
+        if (is_wp_error($response)) {
+            return new \WP_Error('error', $response->errors);
+        }
+
         if ($response['contact']["id"]) {
             return $response;
         }
 
-        return new \WP_Error('error', $response['errors']);
+        return new \WP_Error('error', $response->errors);
     }
 }
