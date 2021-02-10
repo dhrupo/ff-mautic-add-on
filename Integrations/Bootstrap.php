@@ -202,7 +202,6 @@ class Bootstrap extends IntegrationManager
                     'placeholder' => 'Your Feed Name',
                     'component' => 'text'
                 ],
-
                 [
                     'key' => 'fields',
                     'label' => 'Map Fields',
@@ -238,18 +237,18 @@ class Bootstrap extends IntegrationManager
                     'inline_tip' => 'Use comma separated value. You can use smart tags here'
                 ],
                 [
-                    'key' => 'landing_url',
-                    'label' => 'Landing URL',
-                    'tips' => 'When this option is enabled, FluentForm will pass the form page url to the Mautic lead',
+                    'key' => 'last_active',
+                    'label' => 'Last Active',
+                    'tips' => 'When this option is enabled, FluentForm will pass the lead creation time to Mautic lead',
                     'component' => 'checkbox-single',
-                    'checkbox_label' => 'Enable Landing URL'
+                    'checkbox_label' => 'Enable Last Active'
                 ],
                 [
                     'key' => 'last_seen_ip',
                     'label' => 'Push IP Address',
-                    'tips' => 'When this option is enabled, FluentForm will pass the last_seen_ip to Mautic',
+                    'tips' => 'When this option is enabled, FluentForm will pass the ipAddress to Mautic',
                     'component' => 'checkbox-single',
-                    'checkbox_label' => 'Enable last IP address'
+                    'checkbox_label' => 'Enable IP address'
                 ],
                 [
                     'key' => 'conditionals',
@@ -296,7 +295,7 @@ class Bootstrap extends IntegrationManager
         foreach ($fields as $field) {
             $fieldsFormatted[$field['alias']] = $field['label'] ;
         }
-        
+
         unset($fieldsFormatted['email']);
         return $fieldsFormatted;
     }
@@ -327,12 +326,12 @@ class Bootstrap extends IntegrationManager
             $subscriber['tags'] = $formtedTags;
         }
 
-        if (ArrayHelper::isTrue($feedData, 'landing_url')) {
-            $subscriber['landing_url'] = $entry->source_url;
+        if (ArrayHelper::isTrue($feedData, 'last_active')) {
+            $subscriber['lastActive'] = $entry->created_at;
         }
 
         if (ArrayHelper::isTrue($feedData, 'last_seen_ip')) {
-            $subscriber['last_seen_ip'] = $entry->ip;
+            $subscriber['ipAddress'] = $entry->ip;
         }
 
         $subscriber = array_filter($subscriber);
