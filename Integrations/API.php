@@ -182,4 +182,15 @@ class API
 
         return new \WP_Error('error', $response->errors);
     }
+    
+    public function listAvailableFields()
+    {
+        $response = $this->makeRequest('contacts/list/fields', [], 'GET');
+        
+        if(!is_wp_error ($response)){
+            return $response;
+        };
+        
+        return false;
+    }
 }
