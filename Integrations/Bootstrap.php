@@ -279,25 +279,33 @@ class Bootstrap extends IntegrationManager
 
     public function otherFields()
     {
-        $api    = $this->getRemoteClient();
-        $fields = $api->listAvailableFields();  //get available fields from mautic including custom fields
-        
-        if( !$fields ){
-            return [];
-        }
-        
-        //sorting by id for standard ordered list
-        usort($fields, function($a, $b) {
-            return $a['id'] - $b['id'];
-        });
+        // BIND STATIC CAUSE SOME FIELDS ARE NOT SUPPORTED
+        $attributes = [
+            "title" => "Title",
+            "firstname" => "FirstName",
+            "lastname" => "Last Name",
+            "company" => "Company",
+            "position" => "Position",
+            "phone" => "Phone",
+            "mobile" => "Mobile",
+            "address1" => "Address1",
+            "address2" => "Address2",
+            "city" => "City",
+            "zipcode" => "Zipcode",
+            "country" => "Country",
+            "fax" => "Fax",
+            "website" => "Website",
+            "facebook" => "Facebook",
+            "foursquare" => "Foursquare",
+            "googleplus" => "Googleplus",
+            "instagram" => "Instagram",
+            "linkedin" => "Linkedin",
+            "skype" => "Skype",
+            "twitter" => "Twitter"
+        ];
 
-        $fieldsFormatted = [];
-        foreach ($fields as $field) {
-            $fieldsFormatted[$field['alias']] = $field['label'] ;
-        }
 
-        unset($fieldsFormatted['email']);
-        return $fieldsFormatted;
+        return $attributes;
     }
 
     /*
