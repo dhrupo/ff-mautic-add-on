@@ -168,6 +168,17 @@ class API
         }
     }
 
+    public function listAvailableFields()
+    {
+        $response = $this->makeRequest('contacts/list/fields', [], 'GET');
+
+        if(!is_wp_error ($response)){
+            return $response;
+        };
+
+        return false;
+    }
+
     public function subscribe($subscriber)
     {
         $response = $this->makeRequest('contacts/new', $subscriber, 'POST');
