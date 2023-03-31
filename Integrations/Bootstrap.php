@@ -27,7 +27,7 @@ class Bootstrap extends IntegrationManager
         $this->registerAdminHooks();
 
 
-        add_filter('fluentform_notifying_async_mautic', '__return_false');
+//        add_filter('fluentform/notifying_async_mautic', '__return_false');
 
         add_action('admin_init', function () {
             if (isset($_REQUEST['ff_mautic_auth'])) {
@@ -352,8 +352,7 @@ class Bootstrap extends IntegrationManager
         $response = $api->subscribe($subscriber);
 
         if (is_wp_error($response)) {
-            // it's failed
-            do_action('ff_log_data', [
+            $logData = [
                 'parent_source_id' => $form->id,
                 'source_type' => 'submission_item',
                 'source_id' => $entry->id,
@@ -361,10 +360,20 @@ class Bootstrap extends IntegrationManager
                 'status' => 'failed',
                 'title' => $feed['settings']['name'],
                 'description' => $response->errors['error'][0][0]['message']
-            ]);
+            ];
+            do_action_deprecated(
+                'ff_log_data',
+                [
+                    $logData
+                ],
+                FLUENTFORM_FRAMEWORK_UPGRADE,
+                'fluentform/log_data',
+                'Use fluentform/log_data instead of ff_log_data.'
+            );
+            // it's failed
+            do_action('fluentform/log_data', $logData);
         } else {
-            // It's success
-            do_action('ff_log_data', [
+            $logData = [
                 'parent_source_id' => $form->id,
                 'source_type' => 'submission_item',
                 'source_id' => $entry->id,
@@ -372,7 +381,18 @@ class Bootstrap extends IntegrationManager
                 'status' => 'success',
                 'title' => $feed['settings']['name'],
                 'description' => 'Mautic feed has been successfully initialed and pushed data'
-            ]);
+            ];
+            do_action_deprecated(
+                'ff_log_data',
+                [
+                    $logData
+                ],
+                FLUENTFORM_FRAMEWORK_UPGRADE,
+                'fluentform/log_data',
+                'Use fluentform/log_data instead of ff_log_data.'
+            );
+            // It's success
+            do_action('fluentform/log_data', $logData);
         }
     }
 
